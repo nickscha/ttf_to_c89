@@ -19,6 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+import sys
+import os
+
 try:
     from PIL import Image, ImageDraw, ImageFont
 except ImportError:
@@ -140,12 +143,86 @@ def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_ou
     print("Each glyph: {}x{}".format(char_width, char_height))
     print("Total atlas: {}x{}".format(atlas_width, atlas_height))
 
+def get_default_font_path():
+    if sys.platform.startswith("win"):
+        # Windows default Consolas font path
+        return r"C:\Windows\Fonts\consola.ttf"
+    
+    elif sys.platform.startswith("linux"):
+        # Common Linux locations for Consolas or fallback monospace fonts
+        possible_paths = [
+            "/usr/share/fonts/truetype/msttcorefonts/Consola.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Consolas.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Consola.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+            "/usr/share/fonts/truetype/freefont/FreeMono.ttf",
+            "/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
+    elif sys.platform.startswith("darwin"):
+        # macOS default monospace fonts
+        possible_paths = [
+            "/System/Library/Fonts/Supplemental/Andale Mono.ttf",
+            "/System/Library/Fonts/Monaco.ttf",
+            "/System/Library/Fonts/SFMono-Regular.otf",  # newer macOS
+            "/Library/Fonts/Arial Unicode.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
+    elif sys.platform.startswith("freebsd"):
+        # FreeBSD common fonts
+        possible_paths = [
+            "/usr/local/share/fonts/TTF/FreeMono.ttf",
+            "/usr/local/share/fonts/FreeMono.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
+    elif sys.platform.startswith("sunos") or sys.platform.startswith("solaris"):
+        # Solaris / SunOS fonts
+        possible_paths = [
+            "/usr/openwin/lib/X11/fonts/TrueType/arial.ttf",
+            "/usr/openwin/lib/X11/fonts/TrueType/monospace.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
+    else:
+        # Generic Unix fallback
+        possible_paths = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+            "/usr/share/fonts/truetype/freefont/FreeMono.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
 if __name__ == "__main__":
     
+    default_font = get_default_font_path()
+
+    if default_font is None:
+        print("Could not find a default font path on this system. Please specify the font path manually.")
+    else:
+        print(f"Using default font path: {default_font}")
+
     ttf_to_bmp_c89(
-        font_path    = "C:\\Windows\\Fonts\\consola.ttf",  # Path to TTF Font file
-        pixel_height = 32,                                 # Pixel height for each glyph
-        bmp_output   = "font_atlas.bmp",                   # Bitmap output file
-        c_output     = "font_data.h",                      # C89 single header output file
-        flip_y       = True                                # If true Y axis is inverted for OpenGl/Vulkan compatibility
+        font_path    = default_font,     # Path to TTF Font file (e.g. "C:\Windows\Fonts\consola.ttf")
+        pixel_height = 32,               # Pixel height for each glyph
+        bmp_output   = "font_atlas.bmp", # Bitmap output file
+        c_output     = "font_data.h",    # C89 single header output file
+        flip_y       = True              # If true Y axis is inverted for OpenGl/Vulkan compatibility
     )
