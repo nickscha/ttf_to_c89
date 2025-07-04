@@ -24,7 +24,7 @@ Works best with monospaced fonts.
 ```python
 if __name__ == "__main__":
     
-    generate_ascii_bitmap(
+    ttf_to_bmp_c89(
         font_path    = "C:\\Windows\\Fonts\\consola.ttf", 
         pixel_height = 32,
         bmp_output   = "font_atlas.bmp", 

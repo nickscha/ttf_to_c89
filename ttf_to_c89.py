@@ -1,15 +1,45 @@
-from PIL import Image, ImageDraw, ImageFont
+# MIT License
+# 
+# Copyright (c) 2025 Nickscha
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:
+    print("This script requires the Pillow library. Install it using:")
+    print("    pip install pillow")
+    exit(1)
 
-def generate_ascii_bitmap(font_path, pixel_height, bmp_output="font_atlas.bmp", c_output="font_data.h"):
+def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_output="font_data.h"):
     ascii_chars = [chr(i) for i in range(32, 127)]
-    num_chars = len(ascii_chars)
+    num_chars   = len(ascii_chars)
 
     # Load font with possible different style (adjust pixel_height to suit)
-    font = ImageFont.truetype(font_path, pixel_height)
+    try:
+        font = ImageFont.truetype(font_path, pixel_height)
+    except IOError:
+        print(f"Error: Could not load font at {font_path}")
+        return
 
     # Determine max bounding box
-    max_width = 0
-    max_height = 0
+    max_width    = 0
+    max_height   = 0
     min_offset_x = 0
     min_offset_y = 0
 
@@ -18,20 +48,19 @@ def generate_ascii_bitmap(font_path, pixel_height, bmp_output="font_atlas.bmp", 
         x0, y0, x1, y1 = bbox
         w = x1 - x0
         h = y1 - y0
-        max_width = max(max_width, w)
-        max_height = max(max_height, h)
+        max_width    = max(max_width, w)
+        max_height   = max(max_height, h)
         min_offset_x = min(min_offset_x, x0)
         min_offset_y = min(min_offset_y, y0)
 
-    char_width = max_width
-    char_height = max_height
-
-    atlas_width = char_width * num_chars
+    char_width   = max_width
+    char_height  = max_height
+    atlas_width  = char_width * num_chars
     atlas_height = char_height
 
     # Create image
     image = Image.new("RGBA", (atlas_width, atlas_height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
+    draw  = ImageDraw.Draw(image)
 
     # Draw each character at fixed spacing
     for i, ch in enumerate(ascii_chars):
@@ -39,21 +68,19 @@ def generate_ascii_bitmap(font_path, pixel_height, bmp_output="font_atlas.bmp", 
         draw.text((x - min_offset_x, -min_offset_y), ch, font=font, fill=(255, 255, 255, 255))
 
     # Convert the image to grayscale and then to binary (black and white)
-    image = image.convert("L")  # Convert to grayscale
-    threshold = 128  # Threshold to decide what is black or white (can be adjusted)
-    image = image.point(lambda p: p > threshold and 255)  # Apply threshold to make it binary (white and black)
-
-    # Convert the binary image back to "1" mode (1-bit pixels)
-    image = image.convert("1")  # Convert to binary image with 1-bit pixels
+    image     = image.convert("L")                                 # Convert to grayscale
+    threshold = 128                                                # Threshold to decide what is black or white (can be adjusted)
+    image     = image.point(lambda p: 255 if p > threshold else 0) # Apply threshold to make it binary (white and black)
+    image     = image.convert("1", dither=Image.NONE)              # Convert to binary image with 1-bit pixels
 
     # Get the pixel data manually (by accessing pixel values)
     pixel_data = []
+    pixels = image.load()
     for y in range(atlas_height):
         row = []
         for x in range(atlas_width):
-            # Check if the pixel is white (255) or black (0)
-            pixel = image.getpixel((x, y))
-            row.append(1 if pixel == 255 else 0)  # Store 1 for white and 0 for black
+            pixel = pixels[x, y]
+            row.append(1 if pixel == 255 else 0)
         pixel_data.append(row)
 
     # Convert the pixel data into a C89 array format
@@ -101,6 +128,7 @@ def generate_ascii_bitmap(font_path, pixel_height, bmp_output="font_atlas.bmp", 
 
     # Save BMP image
     image.save(bmp_output)
+
     print("Saved BMP:", bmp_output)
     print("C89 static array saved to:", c_output)
     print("Each glyph: {}x{}".format(char_width, char_height))
@@ -108,7 +136,7 @@ def generate_ascii_bitmap(font_path, pixel_height, bmp_output="font_atlas.bmp", 
 
 if __name__ == "__main__":
     
-    generate_ascii_bitmap(
+    ttf_to_bmp_c89(
         font_path    = "C:\\Windows\\Fonts\\consola.ttf", 
         pixel_height = 32,
         bmp_output   = "font_atlas.bmp", 
