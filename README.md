@@ -1,5 +1,5 @@
 # ttf_to_c89
-A small python utility that converts a given ttf font file into a single row font atlas BMP and C89 header file.
+A small python utility that converts a given ttf font file into a single row font atlas of all ASCII printable characters as a BMP and C89 header file.
 
 ## Quick Start
 
