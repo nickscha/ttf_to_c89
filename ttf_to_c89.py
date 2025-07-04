@@ -26,7 +26,7 @@ except ImportError:
     print("    pip install pillow")
     exit(1)
 
-def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_output="font_data.h"):
+def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_output="font_data.h", flip_y=False):
     ascii_chars = [chr(i) for i in range(32, 127)]
     num_chars   = len(ascii_chars)
 
@@ -83,6 +83,11 @@ def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_ou
             row.append(1 if pixel == 255 else 0)
         pixel_data.append(row)
 
+
+    # Flip Y axis if requested
+    if flip_y:
+        pixel_data = pixel_data[::-1]
+
     # Convert the pixel data into a C89 array format
     c_array = []
     for row in pixel_data:
@@ -102,6 +107,7 @@ def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_ou
         f.write(f"/* Font path used : {font_path} */\n")
         f.write(f"/* Font atlas size: {atlas_width}x{atlas_height} */\n")
         f.write(f"/* Each glyph size: {char_width}x{char_height}   */\n")
+        f.write(f"/* Y-axis flipped : {'yes' if flip_y else 'no '} */\n")
         f.write("\n")
         f.write(f"#ifndef FONT_H\n")
         f.write(f"#define FONT_H\n")
@@ -137,8 +143,9 @@ def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_ou
 if __name__ == "__main__":
     
     ttf_to_bmp_c89(
-        font_path    = "C:\\Windows\\Fonts\\consola.ttf", 
-        pixel_height = 32,
-        bmp_output   = "font_atlas.bmp", 
-        c_output     = "font_data.h"
+        font_path    = "C:\\Windows\\Fonts\\consola.ttf",  # Path to TTF Font file
+        pixel_height = 32,                                 # Pixel height for each glyph
+        bmp_output   = "font_atlas.bmp",                   # Bitmap output file
+        c_output     = "font_data.h",                      # C89 single header output file
+        flip_y       = True                                # If true Y axis is inverted for OpenGl/Vulkan compatibility
     )

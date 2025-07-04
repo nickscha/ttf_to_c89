@@ -21,7 +21,7 @@ A "Consolas" rendered font bitmap would look like this:
 
 ## Customization
 
-Modify the "generate_ascii_bitmap" call in the file and adjust the parameters as needed.
+Modify the "ttf_to_bmp_c89" call in the file and adjust the parameters as needed.
 
 For a higher/smoother resolution try adjusting the pixel_height parameter since it can vary based on the ttf font.
 
@@ -31,9 +31,10 @@ Works best with monospaced fonts.
 if __name__ == "__main__":
     
     ttf_to_bmp_c89(
-        font_path    = "C:\\Windows\\Fonts\\consola.ttf", 
-        pixel_height = 32,
-        bmp_output   = "font_atlas.bmp", 
-        c_output     = "font_data.h"
+        font_path    = "C:\\Windows\\Fonts\\consola.ttf",  # Path to TTF Font file
+        pixel_height = 32,                                 # Pixel height for each glyph
+        bmp_output   = "font_atlas.bmp",                   # Bitmap output file
+        c_output     = "font_data.h",                      # C89 single header output file
+        flip_y       = True                                # If true Y axis is inverted for OpenGl/Vulkan compatibility
     )
 ```
