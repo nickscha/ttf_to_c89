@@ -29,7 +29,7 @@ except ImportError:
     print("    pip install pillow")
     exit(1)
 
-def ttf_to_bmp_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_output="font_data.h", flip_y=False):
+def ttf_to_c89(font_path, pixel_height=32, bmp_output="font_atlas.bmp", c_output="font_data.h", flip_y=False):
     ascii_chars = [chr(i) for i in range(32, 127)]
     num_chars   = len(ascii_chars)
 
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     else:
         print(f"Using default font path: {default_font}")
 
-    ttf_to_bmp_c89(
+    ttf_to_c89(
         font_path    = default_font,     # Path to TTF Font file (e.g. "C:\Windows\Fonts\consola.ttf")
         pixel_height = 32,               # Pixel height for each glyph
         bmp_output   = "font_atlas.bmp", # Bitmap output file

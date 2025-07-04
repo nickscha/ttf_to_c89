@@ -30,7 +30,7 @@ Works best with monospaced fonts.
 ```python
 if __name__ == "__main__":
     
-    ttf_to_bmp_c89(
+    ttf_to_c89(
         font_path    = "C:\\Windows\\Fonts\\consola.ttf",  # Path to TTF Font file
         pixel_height = 32,                                 # Pixel height for each glyph
         bmp_output   = "font_atlas.bmp",                   # Bitmap output file
