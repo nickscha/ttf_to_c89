@@ -13,6 +13,12 @@ python ttf_to_c89.py
 
 Afterwards a font_atlas.bmp single row bitmap and a C89 compatible font.h file are generated.
 
+A "Consolas" rendered font bitmap would look like this:
+
+<p align="center">
+<a href="https://nickscha.github.io/"><img src="example.png"></a>
+</p>
+
 ## Customization
 
 Modify the "generate_ascii_bitmap" call in the file and adjust the parameters as needed.
